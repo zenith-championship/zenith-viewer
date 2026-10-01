@@ -1,7 +1,14 @@
 /* ============================================================
    ZENITH VIEWER — Public Layout
    Header horizontal + sidebar móvil + fixes responsivos
+   v2.6.3
    ============================================================ */
+
+/* ──── Prevenir scroll horizontal global (fix dropdowns) ──── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
 
 /* ──── Reset del layout del gestor ──── */
 .public-mode.app-shell {
@@ -10,6 +17,7 @@
   grid-template-columns: none;
   min-height: 100vh;
   background: radial-gradient(1200px 600px at 80% -10%, rgba(111,168,255,.05), transparent 60%), var(--bg-deep);
+  overflow-x: hidden;
 }
 
 .public-mode .sidebar { display: none; }
@@ -127,6 +135,31 @@
   font-weight: 600;
 }
 
+/* ──── DROPDOWNS (fix scroll horizontal) ──── */
+.season-dropdown,
+.division-dropdown {
+  max-width: calc(100vw - 20px);
+  box-sizing: border-box;
+}
+
+/* Desktop: temporada izquierda, división derecha (está más cerca del borde) */
+@media (min-width: 901px) {
+  .division-dropdown {
+    left: auto;
+    right: 0;
+  }
+}
+
+/* Móvil: ambos alineados a la derecha */
+@media (max-width: 900px) {
+  .season-dropdown,
+  .division-dropdown {
+    left: auto;
+    right: 0;
+    max-width: calc(100vw - 20px);
+  }
+}
+
 /* ──── SIDEBAR MÓVIL ──── */
 .public-sidebar {
   display: none;
@@ -204,6 +237,7 @@
   width: 100%;
   margin: 0 auto;
   padding: 26px 28px 60px;
+  box-sizing: border-box;
 }
 
 /* ============================================================
@@ -267,7 +301,7 @@
   /* ──── 1. TABLA GENERAL (widget) ──── */
   .widget-slot[data-widget="standings"] .ztable thead th,
   .widget-slot[data-widget="standings"] .ztable tbody td {
-    padding: 8px 6px;
+    padding: 9px 6px;
   }
   /* Ocultar SG (4) y DP (5) en móvil */
   .widget-slot[data-widget="standings"] .ztable thead th:nth-child(4),
@@ -278,7 +312,27 @@
   }
   .widget-slot[data-widget="standings"] .ztable { font-size: 12px; }
   .widget-slot[data-widget="standings"] .team-cell-name {
-    max-width: 130px;
+    max-width: 140px;
+  }
+
+  /* Widget de tabla general: altura controlada con scroll interno (~6-7 equipos) */
+  .widget-slot[data-widget="standings"] .widget-scroll {
+    max-height: 340px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .widget-slot[data-widget="standings"] .widget-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .widget-slot[data-widget="standings"] .widget-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .widget-slot[data-widget="standings"] .widget-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
   }
 
   /* Zonas en móvil — más compacto */
@@ -476,6 +530,11 @@
   .page-title { font-size: 16px; }
   .stats-tab { padding: 7px 12px; font-size: 11px; }
   .kpi-val { font-size: 16px; }
+
+  /* Ajustar altura de tabla general en móviles muy pequeños */
+  .widget-slot[data-widget="standings"] .widget-scroll {
+    max-height: 320px;
+  }
 }
 
 /* ============================================================
