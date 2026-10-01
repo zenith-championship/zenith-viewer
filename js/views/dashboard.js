@@ -10,6 +10,7 @@ import { openModal } from '../services/ui.js';
 import { getNationFlag } from '../data/nations.js';
 import { getWidgetType } from '../data/database.js';
 import { bindCarouselEvents } from './widgetCarousel.js';
+import { openMatchSummary } from './matchSummary.js';
 
 export function dashboardView(){
   const db = getDB();
@@ -91,6 +92,57 @@ function renderViewBanner(db){
 export function bindDashboardEvents(){
   document.querySelectorAll('[data-news-open]').forEach(card => {
     card.addEventListener('click', () => openNewsModal(card.dataset.newsOpen));
+  });
+
+  // Handler: abrir resumen de partido (widget Upcoming)
+  document.querySelectorAll('[data-open-summary]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const db = getDB();
+      const m = db.matches.find(x => x.id === btn.dataset.openSummary);
+      if (!m) return;
+      openMatchSummary(m, { title: `JORNADA ${m.matchday} · RESUMEN` });
+    });
+  });
+
+  // Handler: abrir resumen de partido de playoff (widgets PlayIn/PlayoffUpcoming)
+  document.querySelectorAll('[data-open-playoff-summary]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const db = getDB();
+      const division = db.divisions.find(d => d.id === state.divisionId) || db.divisions[0];
+      if (!division) return;
+      const pl = (db.playoffs || []).find(p => p.divisionId === division.id);
+      if (!pl || !pl.bracket || !pl.bracket.rounds) return;
+
+      const matchId = btn.dataset.openPlayoffSummary;
+      const roundId = btn.dataset.roundId;
+      const round = pl.bracket.rounds.find(r => r.id === roundId);
+      if (!round) return;
+      const m = round.matches.find(x => x.id === matchId);
+      if (!m) return;
+
+      const games = m.games || [];
+      const status = m.winnerId ? 'finished' : (games.length > 0 ? 'live' : 'pending');
+
+      // Determinar formato
+      let format;
+      const lastRound = pl.bracket.rounds[pl.bracket.rounds.length - 1];
+      const semiRound = pl.bracket.rounds[pl.bracket.rounds.length - 2];
+      if (round.id === 'playIn') format = division.config.playInFormat || 'BO5';
+      else if (lastRound && round.id === lastRound.id) format = division.config.finalFormat || 'BO7';
+      else if (semiRound && round.id === semiRound.id) format = division.config.semiFormat || 'BO5';
+      else format = division.config.playInFormat || 'BO5';
+
+      openMatchSummary({
+        id: m.id,
+        teamAId: m.teamA?.teamId,
+        teamBId: m.teamB?.teamId,
+        games: games,
+        format: m.format || format,
+        status
+      }, { title: `RESUMEN · ${round.name}` });
+    });
   });
 
   bindCarouselEvents(document);
@@ -229,7 +281,7 @@ function widgetUpcoming(w, division){
     const isLive = m.status === 'live' || (hasGames && m.status !== 'finished');
     const isFinished = m.status === 'finished';
 
-    // Badge superior (parpadea si live, estático si final, nada si pending)
+    // Badge superior
     let topBadge = '';
     if (isLive) {
       topBadge = `<div class="hero-live-badge" style="margin-bottom:10px">EN JUEGO</div>`;
@@ -269,6 +321,11 @@ function widgetUpcoming(w, division){
       `;
     }
 
+    // Botón del footer: si hay partidas, abre el resumen; si no, navega a Jornadas
+    const footerBtn = hasGames
+      ? `<button class="btn" data-open-summary="${m.id}">VER DETALLE DEL PARTIDO →</button>`
+      : `<button class="btn" data-route="matches">VER DETALLE DEL PARTIDO →</button>`;
+
     return `
       <div class="wc-slide">
         <div class="hero">
@@ -294,7 +351,7 @@ function widgetUpcoming(w, division){
             ${metaLine}
           </div>
           <div class="hero-footer">
-            <button class="btn" data-route="matches">VER DETALLE DEL PARTIDO →</button>
+            ${footerBtn}
           </div>
         </div>
       </div>
@@ -355,6 +412,7 @@ function widgetPlayInUpcoming(w, division){
   const round = pl.bracket.rounds.find(r => r.id === 'playIn');
   if (!round) return cardHero('PRÓXIMO PLAY-IN', '<div style="color:var(--muted);font-size:12px;padding:20px;text-align:center">Sin ronda de Play-In</div>');
 
+  // Mostrar primero los pendientes/live, luego los finalizados (todos con teams)
   const pending = round.matches.filter(m => !m.winnerId && m.teamA && m.teamB);
   const itemIds = w.config?.itemIds || [];
   let matches;
@@ -400,11 +458,56 @@ function widgetPlayoffUpcoming(w, division){
 function renderPlayoffMatchHero(m, round, division){
   const A = m.teamA || { name: 'TBD' };
   const B = m.teamB || { name: 'TBD' };
+  const games = m.games || [];
+  const hasGames = games.length > 0;
+  const isFinished = !!m.winnerId;
+
+  const sA = games.filter(g => g.scoreA > g.scoreB).length;
+  const sB = games.filter(g => g.scoreB > g.scoreA).length;
+
   const format = round.id === 'final'
     ? (division.config.finalFormat || 'BO7')
     : round.id === 'semi'
       ? (division.config.semiFormat || 'BO5')
       : (division.config.playInFormat || 'BO5');
+
+  // Badge superior
+  let topBadge = '';
+  if (isFinished) topBadge = `<div class="hero-final-badge" style="margin-bottom:10px">✓ FINAL</div>`;
+  else if (hasGames) topBadge = `<div class="hero-live-badge" style="margin-bottom:10px">EN JUEGO</div>`;
+
+  // Bloque central
+  let centerBlock;
+  if (hasGames || isFinished){
+    const winnerIsA = isFinished && sA > sB;
+    const winnerIsB = isFinished && sB > sA;
+    centerBlock = `
+      <div class="hero-score-live">
+        <span class="hs-team-score ${winnerIsA ? 'winner' : (isFinished && winnerIsB ? 'loser' : '')}">${sA}</span>
+        <span class="hs-vs">vs</span>
+        <span class="hs-team-score ${winnerIsB ? 'winner' : (isFinished && winnerIsA ? 'loser' : '')}">${sB}</span>
+      </div>
+    `;
+  } else {
+    centerBlock = `<div class="hero-vs">VS</div>`;
+  }
+
+  // Metadata
+  let metaLine;
+  if (hasGames && !isFinished){
+    metaLine = `<span class="chip chip-accent">${format}</span> <span style="color:var(--muted);font-size:11px;margin-left:8px">· ${games.length} partida${games.length !== 1 ? 's' : ''} jugada${games.length !== 1 ? 's' : ''}</span>`;
+  } else if (isFinished){
+    const winnerName = sA > sB ? A.name : (sB > sA ? B.name : '—');
+    metaLine = `<span class="chip chip-accent">${format}</span> <span style="color:var(--success);font-size:11px;margin-left:8px">· Ganó ${esc(winnerName)}</span>`;
+  } else {
+    metaLine = `<span class="chip chip-accent">${format}</span>`;
+  }
+
+  // Botón
+  const footerBtn = (hasGames || isFinished)
+    ? `<div class="hero-footer"><button class="btn" data-open-playoff-summary="${m.id}" data-round-id="${round.id}">VER DETALLE DEL PARTIDO →</button></div>`
+    : '';
+
   return `
     <div class="hero">
       <div class="hero-top">
@@ -413,20 +516,22 @@ function renderPlayoffMatchHero(m, round, division){
       <div class="hero-round-badge">
         <span class="chip chip-round">${esc(round.name)}</span>
       </div>
+      ${topBadge}
       <div class="hero-teams">
         <div class="hero-team">
           <div class="logo">${logo(A)}</div>
           <div class="name">${esc(A.name)}</div>
         </div>
-        <div class="hero-vs">VS</div>
+        ${centerBlock}
         <div class="hero-team">
           <div class="logo">${logo(B)}</div>
           <div class="name">${esc(B.name)}</div>
         </div>
       </div>
       <div class="hero-meta">
-        <span class="chip chip-accent">${format}</span>
+        ${metaLine}
       </div>
+      ${footerBtn}
     </div>
   `;
 }
