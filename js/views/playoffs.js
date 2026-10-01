@@ -66,12 +66,17 @@ export function bindPlayoffsEvents(){
         const rd = pl2?.bracket?.rounds?.find(r => r.id === roundId);
         const m = rd?.matches?.[+idx];
         if (!m) return;
+
+        const games = m.games || [];
+        const status = m.winnerId ? 'finished' : (games.length > 0 ? 'live' : 'pending');
+
         openMatchSummary({
           id: m.id,
           teamAId: m.teamA?.teamId,
           teamBId: m.teamB?.teamId,
-          games: m.games,
-          format: m.format || getFormatForRound(roundId, div2)
+          games: games,
+          format: m.format || getFormatForRound(roundId, div2),
+          status
         }, { title: `RESUMEN · ${rd.name}` });
       } catch (err){
         console.error('[ZENITH] Summary error:', err);
@@ -228,10 +233,13 @@ function renderNode(m, roundId, idx, x, y, isPlayIn){
   if (isPlayIn) classes.push('is-playin');
   if (reported && !isBye && hasGames) classes.push('is-reported');
 
-  const summaryAttr = (reported && !isBye && hasGames) ? `data-summary-match="${roundId}:${idx}"` : '';
+  // ✅ Cambio: clickeable cuando hay partidas jugadas (live o finished)
+  const summaryAttr = (!isBye && hasGames) ? `data-summary-match="${roundId}:${idx}"` : '';
+  // Cursor pointer también cuando está en vivo (no solo reportado)
+  const cursorStyle = (!isBye && hasGames && !reported) ? 'cursor:pointer;' : '';
 
   return `
-    <div class="${classes.join(' ')}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px" ${summaryAttr}>
+    <div class="${classes.join(' ')}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px;${cursorStyle}" ${summaryAttr}>
       ${renderRow(m.teamA, winnerA, 'A', m, roundId, idx, wonA, wonB, isBye)}
       ${renderRow(m.teamB, winnerB, 'B', m, roundId, idx, wonA, wonB, isBye)}
       <div class="bracket-v6-foot">${footHTML}</div>
