@@ -25,8 +25,21 @@ export function openMatchSummary(match, options = {}){
     else if(g.scoreB > g.scoreA) totalB++;
   });
 
+  // ─── Detección de estado ───
+  const status = match.status || 'pending';
+  const isLive = status === 'live' || (games.length > 0 && status !== 'finished');
+  const isFinished = status === 'finished';
+
   const format = match.format || (options.defaultFormat) || 'BO3';
   const title = options.title || 'RESUMEN DEL PARTIDO';
+
+  // Badge superior
+  let statusBadge = '';
+  if (isLive) {
+    statusBadge = `<div style="text-align:center;margin-bottom:10px"><span class="hero-live-badge">EN JUEGO</span></div>`;
+  } else if (isFinished) {
+    statusBadge = `<div style="text-align:center;margin-bottom:10px"><span class="hero-final-badge">✓ FINAL</span></div>`;
+  }
 
   // Render del modal
   openModal({
@@ -35,6 +48,8 @@ export function openMatchSummary(match, options = {}){
     wide: true,
     body: `
       <div class="match-summary">
+        ${statusBadge}
+
         <!-- Hero -->
         <div class="ms-hero">
           <div class="ms-team ms-team-a">
@@ -73,7 +88,6 @@ export function openMatchSummary(match, options = {}){
     onMount: root => {
       const tabsEl = root.querySelector('#msTabs');
       const bodyEl = root.querySelector('#msBody');
-      const rendered = new Set();
 
       function renderTab(tabId){
         if(tabId === 'total'){
