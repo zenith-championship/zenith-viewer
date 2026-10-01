@@ -605,3 +605,125 @@ html, body {
   text-overflow: ellipsis;
   max-width: 160px;
 }
+
+/* ============================================================
+   WIDGET PRÓXIMO PARTIDO — Marcador en vivo / final
+   v2.6.6
+   ============================================================ */
+
+/* Badge EN JUEGO parpadeante */
+.hero-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: #B23A3A;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: .2em;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid #B23A3A;
+  animation: heroLivePulse 1.4s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(178,58,58,.55);
+  margin: 0 auto;
+}
+
+.hero-live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px #fff;
+  animation: heroLiveDot 1.4s ease-in-out infinite;
+}
+
+@keyframes heroLivePulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(178,58,58,.55), 0 0 0 0 rgba(178,58,58,.4);
+    background: #B23A3A;
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(178,58,58,.85), 0 0 0 6px rgba(178,58,58,0);
+    background: #C74A4A;
+  }
+}
+
+@keyframes heroLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .4; transform: scale(.75); }
+}
+
+/* Badge FINAL (no parpadea) */
+.hero-final-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--success);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: .2em;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid rgba(99,194,138,.45);
+  margin: 0 auto;
+}
+
+/* Contenedor del marcador central (reemplaza al VS cuando hay juego) */
+.hero-score-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-family: var(--font-display);
+  letter-spacing: .06em;
+  line-height: 1;
+}
+
+.hero-score-live .hs-team-score {
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--silver-light);
+  min-width: 38px;
+  text-align: center;
+}
+
+.hero-score-live .hs-team-score.winner {
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(230,196,118,.4);
+}
+
+.hero-score-live .hs-team-score.loser {
+  color: var(--muted);
+}
+
+.hero-score-live .hs-vs {
+  font-size: 18px;
+  color: var(--muted);
+  letter-spacing: .18em;
+  text-transform: lowercase;
+}
+
+/* En móvil, ajustamos tamaños */
+@media (max-width: 600px) {
+  .hero-score-live .hs-team-score {
+    font-size: 30px;
+    min-width: 30px;
+  }
+  .hero-score-live .hs-vs {
+    font-size: 15px;
+  }
+  .hero-live-badge,
+  .hero-final-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    letter-spacing: .16em;
+  }
+}
