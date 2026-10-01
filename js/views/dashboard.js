@@ -197,7 +197,7 @@ function buildCarouselHTML(items, slideHTMLs, instanceId, interval){
 }
 
 // ============================================================
-// WIDGETS CON CARRUSEL
+// WIDGET PRÓXIMO PARTIDO — con badge EN JUEGO / FINAL y marcador
 // ============================================================
 function widgetUpcoming(w, division){
   const db = getDB();
@@ -220,6 +220,55 @@ function widgetUpcoming(w, division){
   const slides = matches.map(m => {
     const A = db.teams.find(t => t.id === m.teamAId) || { name: 'TBD' };
     const B = db.teams.find(t => t.id === m.teamBId) || { name: 'TBD' };
+
+    // ─── Calcular marcador parcial / final ───
+    const games = m.games || [];
+    const sA = games.filter(g => g.scoreA > g.scoreB).length;
+    const sB = games.filter(g => g.scoreB > g.scoreA).length;
+    const hasGames = games.length > 0;
+    const isLive = m.status === 'live' || (hasGames && m.status !== 'finished');
+    const isFinished = m.status === 'finished';
+
+    // Badge superior (parpadea si live, estático si final, nada si pending)
+    let topBadge = '';
+    if (isLive) {
+      topBadge = `<div class="hero-live-badge" style="margin-bottom:10px">EN JUEGO</div>`;
+    } else if (isFinished) {
+      topBadge = `<div class="hero-final-badge" style="margin-bottom:10px">✓ FINAL</div>`;
+    }
+
+    // Bloque central: VS o marcador
+    let centerBlock;
+    if (isLive || isFinished) {
+      const winnerIsA = isFinished && sA > sB;
+      const winnerIsB = isFinished && sB > sA;
+      centerBlock = `
+        <div class="hero-score-live">
+          <span class="hs-team-score ${winnerIsA ? 'winner' : (isFinished && winnerIsB ? 'loser' : '')}">${sA}</span>
+          <span class="hs-vs">vs</span>
+          <span class="hs-team-score ${winnerIsB ? 'winner' : (isFinished && winnerIsA ? 'loser' : '')}">${sB}</span>
+        </div>
+      `;
+    } else {
+      centerBlock = `<div class="hero-vs">VS</div>`;
+    }
+
+    // Metadata inferior
+    let metaLine;
+    if (isLive) {
+      metaLine = `<span class="chip chip-accent">${m.format || 'BO3'}</span> <span style="color:var(--muted);font-size:11px">· ${games.length} partida${games.length !== 1 ? 's' : ''} jugada${games.length !== 1 ? 's' : ''}</span>`;
+    } else if (isFinished) {
+      const winnerName = sA > sB ? A.name : (sB > sA ? B.name : '—');
+      metaLine = `<span class="chip chip-accent">${m.format || 'BO3'}</span> <span style="color:var(--success);font-size:11px">· Ganó ${esc(winnerName)}</span>`;
+    } else {
+      metaLine = `
+        <div style="color:var(--silver-light);letter-spacing:.14em;font-size:12px;margin-bottom:8px">
+          ${m.date || 'FECHA POR CONFIRMAR'} ${m.time ? '· ' + m.time : ''}
+        </div>
+        <span class="chip chip-accent">${m.format || 'BO3'}</span>
+      `;
+    }
+
     return `
       <div class="wc-slide">
         <div class="hero">
@@ -227,13 +276,14 @@ function widgetUpcoming(w, division){
             <span class="chip chip-accent">JORNADA ${m.matchday}</span>
             <span class="chip">${esc(division.name)}</span>
           </div>
+          ${topBadge}
           <div class="hero-teams">
             <div class="hero-team">
               <div class="logo">${logo(A)}</div>
               <div class="name">${esc(A.name)}</div>
               <div class="meta">${posOf(A.id)}º · ${ptsOf(A.id)} PTS</div>
             </div>
-            <div class="hero-vs">VS</div>
+            ${centerBlock}
             <div class="hero-team">
               <div class="logo">${logo(B)}</div>
               <div class="name">${esc(B.name)}</div>
@@ -241,10 +291,7 @@ function widgetUpcoming(w, division){
             </div>
           </div>
           <div class="hero-meta">
-            <div style="color:var(--silver-light);letter-spacing:.14em;font-size:12px;margin-bottom:8px">
-              ${m.date || 'FECHA POR CONFIRMAR'} ${m.time ? '· ' + m.time : ''}
-            </div>
-            <span class="chip chip-accent">${m.format}</span>
+            ${metaLine}
           </div>
           <div class="hero-footer">
             <button class="btn" data-route="matches">VER DETALLE DEL PARTIDO →</button>
