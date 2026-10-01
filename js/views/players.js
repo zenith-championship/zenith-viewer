@@ -4,7 +4,7 @@
 import { getDB } from '../services/storage.js';
 import { aggregatePlayerStats, computeRankings } from '../services/statistics.js';
 import { streakLabel } from '../services/pig.js';
-import { getNationFlag, getNationName, platformIcon, getRankColor, getRankLabel } from '../data/nations.js';
+import { getNationFlag, getNationName, platformIcon, getRankColor, getRankLabelResponsive } from '../data/nations.js';
 import { openModal } from '../services/ui.js';
 import { renderVitrina } from '../services/trophies.js';
 import { state } from '../state.js';
@@ -12,7 +12,7 @@ import { state } from '../state.js';
 export function playersView(params = []){
   const db = getDB();
   const playerId = params[0];
-  if (playerId){
+  if (playerId) {
     const p = db.players.find(x => x.id === playerId);
     if (!p) return `<div class="card">Jugador no encontrado.</div>`;
     return playerProfileView(p);
@@ -48,7 +48,7 @@ export function playersView(params = []){
   return `
     <div class="page-head">
       <h1 class="page-title">JUGADORES</h1>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span class="chip chip-accent">📍 ${division.tier || '?'}ª · ${esc(division.name)}</span>
         <span class="chip">${totalPlayers} jugadores</span>
       </div>
@@ -70,20 +70,26 @@ function renderTeamGroup(team, players, allStats){
   return `
     <div class="card" style="margin-bottom:16px">
       <div class="card-header">
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
           ${team.logo
-            ? `<img src="${team.logo}" style="width:32px;height:32px;object-fit:contain;background:var(--bg-elev);border-radius:8px;padding:3px;border:1px solid var(--border-soft)">`
-            : `<div style="width:32px;height:32px;background:var(--bg-elev);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);border:1px solid var(--border-soft)">◆</div>`}
-          <div class="card-title" style="margin:0">${esc(team.name)}</div>
+            ? `<img src="${team.logo}" style="width:32px;height:32px;object-fit:contain;background:var(--bg-elev);border-radius:8px;padding:3px;border:1px solid var(--border-soft);flex-shrink:0">`
+            : `<div style="width:32px;height:32px;background:var(--bg-elev);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);border:1px solid var(--border-soft);flex-shrink:0">◆</div>`}
+          <div class="card-title" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(team.name)}</div>
         </div>
         <span class="card-sub">${players.length} jugador${players.length !== 1 ? 'es' : ''}</span>
       </div>
-      <div class="table-wrap">
-        <table class="ztable">
+      <div class="table-wrap players-table-wrap">
+        <table class="ztable players-table">
           <thead>
             <tr>
-              <th>#</th><th>JUGADOR</th><th>PLATAFORMA</th><th>RANGO</th>
-              <th class="num">PJ</th><th class="num">G</th><th class="num">PIG</th><th class="num">🏆</th>
+              <th class="col-pos">#</th>
+              <th class="col-player">JUGADOR</th>
+              <th class="col-platform">PLATAFORMA</th>
+              <th class="col-rank">RANGO</th>
+              <th class="num col-games">PJ</th>
+              <th class="num col-goals">G</th>
+              <th class="num col-pig">PIG</th>
+              <th class="num col-trophies">🏆</th>
             </tr>
           </thead>
           <tbody>
@@ -102,9 +108,20 @@ function renderOrphanGroup(players, allStats){
         <div class="card-title" style="color:var(--muted)"><span class="dot" style="color:var(--muted)">◆</span>AGENTES LIBRES</div>
         <span class="card-sub">${players.length}</span>
       </div>
-      <div class="table-wrap">
-        <table class="ztable">
-          <thead><tr><th>#</th><th>JUGADOR</th><th>PLATAFORMA</th><th>RANGO</th><th class="num">PJ</th><th class="num">G</th><th class="num">PIG</th><th class="num">🏆</th></tr></thead>
+      <div class="table-wrap players-table-wrap">
+        <table class="ztable players-table">
+          <thead>
+            <tr>
+              <th class="col-pos">#</th>
+              <th class="col-player">JUGADOR</th>
+              <th class="col-platform">PLATAFORMA</th>
+              <th class="col-rank">RANGO</th>
+              <th class="num col-games">PJ</th>
+              <th class="num col-goals">G</th>
+              <th class="num col-pig">PIG</th>
+              <th class="num col-trophies">🏆</th>
+            </tr>
+          </thead>
           <tbody>
             ${players.map((p, i) => playerRow(p, i, allStats)).join('')}
           </tbody>
@@ -118,11 +135,11 @@ function playerRow(p, i, allStats){
   const s = allStats.find(x => x.id === p.id) || {};
   const flag = p.nationalityCode ? getNationFlag(p.nationalityCode) : '';
   const rankColor = getRankColor(p.rank, p.rankLevel);
-  const rankLine = getRankLabel(p.rank, p.rankLevel, p.rankDivision);
+  const rankLine = getRankLabelResponsive(p.rank, p.rankLevel, p.rankDivision);
   const trophies = p.trophies || [];
   return `<tr style="cursor:pointer" data-player-profile="${p.id}">
-    <td>${i + 1}</td>
-    <td>
+    <td class="col-pos">${i + 1}</td>
+    <td class="col-player">
       <div class="player-cell">
         ${p.profilePicture
           ? `<img src="${p.profilePicture}" class="player-cell-avatar">`
@@ -131,12 +148,12 @@ function playerRow(p, i, allStats){
         ${flag ? `<span class="player-cell-flag">${flag}</span>` : ''}
       </div>
     </td>
-    <td style="color:var(--muted)"><i class="${platformIcon(p.platform)}"></i> ${esc(p.platform || '—')}</td>
-    <td><span class="chip" style="color:${rankColor}">${esc(rankLine)}</span></td>
-    <td class="num">${s.games || 0}</td>
-    <td class="num">${s.goals || 0}</td>
-    <td class="num" style="color:var(--accent);font-weight:600">${(s.pig || 0).toFixed(1)}</td>
-    <td class="num">${trophies.length > 0 ? `<span class="trophy-count" title="${trophies.length} trofeos">🏆 ${trophies.length}</span>` : '—'}</td>
+    <td class="col-platform" style="color:var(--muted)"><i class="${platformIcon(p.platform)}"></i> ${esc(p.platform || '—')}</td>
+    <td class="col-rank"><span class="chip" style="color:${rankColor}">${esc(rankLine)}</span></td>
+    <td class="num col-games">${s.games || 0}</td>
+    <td class="num col-goals">${s.goals || 0}</td>
+    <td class="num col-pig" style="color:var(--accent);font-weight:600">${(s.pig || 0).toFixed(1)}</td>
+    <td class="num col-trophies">${trophies.length > 0 ? `<span class="trophy-count" title="${trophies.length} trofeos">🏆 ${trophies.length}</span>` : '—'}</td>
   </tr>`;
 }
 
@@ -152,12 +169,12 @@ function playerProfileView(p){
   const flag = p.nationalityCode ? getNationFlag(p.nationalityCode) : '';
   const nationName = p.nationalityCode ? getNationName(p.nationalityCode) : '';
   const rankColor = getRankColor(p.rank, p.rankLevel);
-  const rankLine = getRankLabel(p.rank, p.rankLevel, p.rankDivision);
+  const rankLine = getRankLabelResponsive(p.rank, p.rankLevel, p.rankDivision);
   const trendColor = { '▲': 'var(--success)', '▼': 'var(--danger)', '—': 'var(--muted)' };
   const trophies = p.trophies || [];
 
   let divId = p.divisionId;
-  if (!divId){
+  if (!divId) {
     const t = db.teams.find(t => (t.roster || []).some(r => r.playerId === p.id));
     if (t) divId = t.divisionId;
   }
