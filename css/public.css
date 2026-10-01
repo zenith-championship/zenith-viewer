@@ -1,7 +1,7 @@
 /* ============================================================
    ZENITH VIEWER — Public Layout
    Header horizontal + sidebar móvil + fixes responsivos
-   v2.6.4 — Fix Tabla General móvil (Opción 3)
+   v2.6.5 — Tabla General móvil: 3 columnas (PTS, SG, DP)
    ============================================================ */
 
 /* ──── Prevenir scroll horizontal global (fix dropdowns) ──── */
@@ -299,8 +299,9 @@ html, body {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     1. TABLA GENERAL (widget) — FIX ALTURA MÓVIL v2.6.4
-     Objetivo: mostrar 5-7 equipos con scroll interno
+     1. TABLA GENERAL (widget) — FIX ALTURA MÓVIL v2.6.5
+     Móvil: 5-7 equipos visibles + scroll interno.
+     MOSTRAR las 3 columnas de datos: PTS, SG, DP.
      ═══════════════════════════════════════════════════════════ */
 
   /* El slot debe poder crecer y NO colapsar por el grid-row: span 1 */
@@ -322,7 +323,7 @@ html, body {
     flex-shrink: 0;
   }
 
-  /* El scroll interno: aquí es donde se ve la magia */
+  /* El scroll interno: aquí vive la lista de equipos */
   .widget-slot[data-widget="standings"] .widget-scroll {
     flex: 1 1 auto;
     min-height: 0;
@@ -351,16 +352,17 @@ html, body {
     padding: 9px 6px;
   }
 
-  /* Ocultar SG (4) y DP (5) en móvil */
-  .widget-slot[data-widget="standings"] .ztable thead th:nth-child(4),
-  .widget-slot[data-widget="standings"] .ztable thead th:nth-child(5),
-  .widget-slot[data-widget="standings"] .ztable tbody td:nth-child(4),
-  .widget-slot[data-widget="standings"] .ztable tbody td:nth-child(5) {
-    display: none;
-  }
+  /* Reducir ligeramente la fuente para que quepan las 3 columnas */
   .widget-slot[data-widget="standings"] .ztable { font-size: 12px; }
   .widget-slot[data-widget="standings"] .team-cell-name {
-    max-width: 140px;
+    max-width: 110px;
+  }
+
+  /* Números un poco más compactos */
+  .widget-slot[data-widget="standings"] .ztable .num {
+    font-size: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
   }
 
   /* Zonas en móvil — más compacto */
@@ -566,36 +568,6 @@ html, body {
   }
   .widget-slot[data-widget="standings"] .widget-scroll {
     max-height: 280px;
-  }
-}
-
-/* ============================================================
-   FIX DESKTOP — Tabla General más cómoda
-   (no cambia el span, solo compacta padding para que se vea mejor)
-   ============================================================ */
-@media (min-width: 901px) {
-  .widget-slot[data-widget="standings"] .ztable thead th,
-  .widget-slot[data-widget="standings"] .ztable tbody td {
-    padding: 9px 10px;
-  }
-  .widget-slot[data-widget="standings"] .team-cell-name {
-    max-width: 160px;
-  }
-  /* El scroll interno en desktop: limita altura del widget de standings
-     para que no empuje los demás widgets hacia abajo */
-  .widget-slot[data-widget="standings"] .widget-scroll {
-    max-height: 340px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-  .widget-slot[data-widget="standings"] .widget-scroll::-webkit-scrollbar {
-    width: 6px;
-  }
-  .widget-slot[data-widget="standings"] .widget-scroll::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
   }
 }
 
