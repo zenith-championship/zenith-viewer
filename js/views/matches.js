@@ -52,8 +52,10 @@ function matchRow(m){
        </div>`
     : `<div class="match-meta-line"><span class="chip">${m.format || 'BO3'}</span> <span style="color:var(--muted);font-size:11px">sin fecha asignada</span></div>`;
 
-  const locked = m.status === 'finished';
-  const summaryAttr = locked ? `data-match-summary="${m.id}"` : '';
+  // Clickeable cuando tiene partidas jugadas (live o finished)
+  const hasGames = (m.games || []).length > 0;
+  const clickable = hasGames;
+  const summaryAttr = clickable ? `data-match-summary="${m.id}"` : '';
 
   const renderSide = (team, side) => {
     if (!team){
@@ -72,7 +74,7 @@ function matchRow(m){
   };
 
   return `
-    <div class="match-row" data-match-id="${m.id}" ${summaryAttr} style="${locked ? 'cursor:pointer' : ''}">
+    <div class="match-row" data-match-id="${m.id}" ${summaryAttr} style="${clickable ? 'cursor:pointer' : ''}">
       <div class="match-row-top">
         ${renderSide(A, 'A')}
         <div class="match-score">
