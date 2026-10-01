@@ -4,7 +4,7 @@
 import { getDB } from '../services/storage.js';
 import { state } from '../state.js';
 import { aggregatePlayerStats } from '../services/statistics.js';
-import { getRankColor } from '../data/nations.js';
+import { getRankColor, getRankLabelResponsive } from '../data/nations.js';
 import { computeStandings } from '../services/standings.js';
 import { renderVitrina } from '../services/trophies.js';
 
@@ -12,7 +12,7 @@ export function rostersView(params = []){
   const db = getDB();
   const teamId = params[0];
 
-  if (teamId){
+  if (teamId) {
     const team = db.teams.find(t => t.id === teamId);
     if (!team) return `<div class="card">Equipo no encontrado.</div>`;
     return teamProfileView(team);
@@ -37,7 +37,7 @@ function teamCardMini(t){
         <div class="team-logo-box-lg">
           ${t.logo ? `<img src="${t.logo}" class="team-logo-img">` : '<span class="team-logo-fallback">◆</span>'}
         </div>
-        <div>
+        <div style="min-width:0">
           <div class="team-name">${esc(t.name)}</div>
           <div class="team-coach">Coach: ${esc(t.coach || '—')}</div>
         </div>
@@ -46,6 +46,7 @@ function teamCardMini(t){
       ${t.roster.map(r => {
         const p = db.players.find(x => x.id === r.playerId) || {};
         const rankColor = p.rank ? getRankColor(p.rank, p.rankLevel) : 'var(--silver)';
+        const rankLine = p.rank ? getRankLabelResponsive(p.rank, p.rankLevel, p.rankDivision) : '';
         return `<div class="roster-row" style="border-bottom:1px solid var(--border-soft);padding:7px 0">
           <div class="roster-row-main">
             ${p.profilePicture
@@ -53,7 +54,7 @@ function teamCardMini(t){
               : `<div class="roster-avatar roster-avatar-empty">${(p.name || '?').slice(0, 2).toUpperCase()}</div>`}
             <div style="min-width:0">
               <div style="font-size:12.5px;color:${rankColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name || '?'}</div>
-              <div style="font-size:10.5px;color:var(--muted)">${p.platform || '—'} · ${p.rank || '—'}${p.rankDivision && p.rank !== 'SSL' ? ' ' + p.rankDivision : ''}</div>
+              <div style="font-size:10.5px;color:var(--muted)">${p.platform || '—'} · ${rankLine}</div>
             </div>
           </div>
           <span class="badge ${r.role === 'CAPITÁN' ? 'badge-gold' : ''}">${r.role}</span>
@@ -93,13 +94,13 @@ function teamProfileView(team){
           ${team.logo ? `<img src="${team.logo}" class="team-logo-img">` : '<span class="team-logo-fallback" style="font-size:34px">◆</span>'}
         </div>
         <div style="flex:1;min-width:200px">
-          <div class="team-name" style="font-family:var(--font-display);letter-spacing:.22em;font-size:26px;display:flex;align-items:center;gap:10px">
+          <div class="team-name" style="font-family:var(--font-display);letter-spacing:.22em;font-size:26px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             ${rank ? `<span class="team-rank-inline">#${rank}</span>` : ''}
             ${esc(team.name)}
           </div>
           <div class="team-coach" style="letter-spacing:.12em;margin-top:4px">COACH · ${esc(team.coach || '—')}</div>
         </div>
-        <div class="kpi-strip" style="grid-template-columns:repeat(3,1fr);min-width:340px">
+        <div class="kpi-strip team-hero-kpis" style="grid-template-columns:repeat(3,1fr);min-width:340px">
           <div class="kpi"><div class="kpi-val">${teamAgg.games}</div><div class="kpi-lab">PARTIDAS</div></div>
           <div class="kpi"><div class="kpi-val">${teamAgg.wins}</div><div class="kpi-lab">VICTORIAS</div></div>
           <div class="kpi"><div class="kpi-val">${teamAgg.goals}</div><div class="kpi-lab">GOLES</div></div>
@@ -114,10 +115,11 @@ function teamProfileView(team){
           const p = db.players.find(x => x.id === r.playerId) || {};
           const s = stats.find(x => x.id === p.id) || {};
           const rankColor = p.rank ? getRankColor(p.rank, p.rankLevel) : 'var(--silver)';
+          const rankLine = p.rank ? getRankLabelResponsive(p.rank, p.rankLevel, p.rankDivision) : '';
           return `
             <div class="roster-row" style="padding:12px 0;border-bottom:1px solid var(--border-soft)">
               <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:8px">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                   ${p.profilePicture
                     ? `<img class="roster-avatar" src="${p.profilePicture}">`
                     : `<div class="roster-avatar roster-avatar-empty">${(p.name || '?').slice(0, 2).toUpperCase()}</div>`}
@@ -125,7 +127,7 @@ function teamProfileView(team){
                   <span class="badge ${r.role === 'CAPITÁN' ? 'badge-gold' : ''}">${r.role}</span>
                 </div>
                 <div style="font-size:11px;color:var(--muted);margin-top:3px;padding-left:34px">
-                  ${p.platform || '—'} · ${p.rank || '—'}${p.rankDivision && p.rank !== 'SSL' ? ' ' + p.rankDivision : ''}
+                  ${p.platform || '—'} · ${rankLine}
                   ${p.rlTracker ? `· <a href="${p.rlTracker}" target="_blank" style="color:var(--accent)">RL Tracker ↗</a>` : ''}
                 </div>
               </div>
