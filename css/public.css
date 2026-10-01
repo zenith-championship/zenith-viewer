@@ -1,7 +1,7 @@
 /* ============================================================
    ZENITH VIEWER — Public Layout
    Header horizontal + sidebar móvil + fixes responsivos
-   v2.6.5 — Tabla General móvil: 3 columnas (PTS, SG, DP)
+   v2.7.0 — Fixes de layout: modal resumen, jornadas, carrusel
    ============================================================ */
 
 /* ──── Prevenir scroll horizontal global (fix dropdowns) ──── */
@@ -280,6 +280,13 @@ html, body {
 
   /* Grid 3 col → 1 */
   .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
+
+  /* ──── Carrusel: flechas más pequeñas en tablet ──── */
+  .wc-nav {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
 }
 
 /* ============================================================
@@ -549,6 +556,107 @@ html, body {
   .kpi { padding: 8px 6px; }
   .kpi-val { font-size: 18px; }
   .kpi-lab { font-size: 9px; letter-spacing: .12em; }
+
+  /* ──── [C] MATCH ROW — Jornadas: nombres largos ──── */
+  .match-row-top {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+  .match-team {
+    max-width: 38vw;
+    min-width: 0;
+  }
+  .match-team-name { font-size: 12px; }
+  .match-team-logo {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px;
+    max-width: 30px;
+  }
+  .match-score {
+    font-size: 18px;
+    min-width: 60px;
+  }
+
+  /* ──── [B] MODAL MATCH SUMMARY — móvil ──── */
+  .ms-hero {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 14px 8px;
+  }
+  .ms-team-logo { width: 44px; height: 44px; padding: 4px; border-radius: 8px; }
+  .ms-team-logo-empty { font-size: 18px; }
+  .ms-team-name {
+    font-size: 11px;
+    letter-spacing: .08em;
+    line-height: 1.2;
+  }
+  .ms-score { min-width: 80px; }
+  .ms-score-line { font-size: 28px; gap: 8px; }
+  .ms-score-sep { font-size: 20px; }
+  .ms-score-meta { font-size: 9px; letter-spacing: .12em; }
+
+  /* ──── [D] WIDGET PRÓXIMO PARTIDO — móvil ──── */
+
+  /* Hero más compacto en móvil */
+  .hero {
+    padding: 16px 10px;
+  }
+  .hero-top {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .hero-teams {
+    gap: 8px;
+  }
+  .hero-team .logo {
+    width: 56px;
+    height: 56px;
+  }
+  .hero-team .name {
+    font-size: 13px;
+    letter-spacing: .08em;
+  }
+  .hero-team .meta {
+    font-size: 10px;
+  }
+  .hero-vs {
+    font-size: 18px;
+  }
+  .hero-score-live {
+    gap: 8px;
+  }
+  .hero-score-live .hs-team-score {
+    font-size: 26px;
+    min-width: 26px;
+  }
+  .hero-score-live .hs-vs {
+    font-size: 13px;
+  }
+  .hero-live-badge,
+  .hero-final-badge {
+    font-size: 9.5px;
+    padding: 3px 10px;
+  }
+
+  /* Flechas del carrusel: las ocultamos en móvil para evitar cortes.
+     Navegación por dots. */
+  .wc-nav {
+    display: none;
+  }
+
+  /* Dots más visibles en móvil */
+  .wc-dots {
+    padding-top: 10px;
+    gap: 7px;
+  }
+  .wc-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .wc-dot.active {
+    width: 22px;
+  }
 }
 
 /* ============================================================
@@ -607,123 +715,91 @@ html, body {
 }
 
 /* ============================================================
-   WIDGET PRÓXIMO PARTIDO — Marcador en vivo / final
-   v2.6.6
+   [A] FIX MODAL MATCH SUMMARY — evitar desbordes con nombres largos
+   (global, aplica en desktop y móvil)
    ============================================================ */
-
-/* Badge EN JUEGO parpadeante */
-.hero-live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 100px;
-  background: #B23A3A;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: .2em;
-  font-weight: 700;
-  text-transform: uppercase;
-  border: 1px solid #B23A3A;
-  animation: heroLivePulse 1.4s ease-in-out infinite;
-  box-shadow: 0 0 12px rgba(178,58,58,.55);
-  margin: 0 auto;
+.ms-hero {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
-
-.hero-live-badge::before {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 6px #fff;
-  animation: heroLiveDot 1.4s ease-in-out infinite;
+.ms-team {
+  min-width: 0;
+  max-width: 100%;
 }
-
-@keyframes heroLivePulse {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(178,58,58,.55), 0 0 0 0 rgba(178,58,58,.4);
-    background: #B23A3A;
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(178,58,58,.85), 0 0 0 6px rgba(178,58,58,0);
-    background: #C74A4A;
-  }
+.ms-team-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  padding: 0 4px;
 }
-
-@keyframes heroLiveDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: .4; transform: scale(.75); }
+.ms-score {
+  min-width: 0;
 }
-
-/* Badge FINAL (no parpadea) */
-.hero-final-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 100px;
-  background: transparent;
-  color: var(--success);
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: .2em;
-  font-weight: 700;
-  text-transform: uppercase;
-  border: 1px solid rgba(99,194,138,.45);
-  margin: 0 auto;
-}
-
-/* Contenedor del marcador central (reemplaza al VS cuando hay juego) */
-.hero-score-live {
-  display: flex;
-  align-items: center;
+.ms-score-line {
   justify-content: center;
-  gap: 14px;
-  font-family: var(--font-display);
-  letter-spacing: .06em;
-  line-height: 1;
+}
+.ms-team-logo {
+  max-width: 100%;
+  height: auto;
 }
 
-.hero-score-live .hs-team-score {
-  font-size: 38px;
-  font-weight: 700;
-  color: var(--silver-light);
-  min-width: 38px;
-  text-align: center;
+/* ============================================================
+   [C] FIX JORNADAS — nombres largos en match rows
+   (global)
+   ============================================================ */
+.match-row-top {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.match-team {
+  max-width: 100%;
+  min-width: 0;
+}
+.match-team-name {
+  min-width: 0;
+  max-width: 100%;
 }
 
-.hero-score-live .hs-team-score.winner {
-  color: var(--gold);
-  text-shadow: 0 0 18px rgba(230,196,118,.4);
+/* ============================================================
+   [D] FIX WIDGET PRÓXIMO PARTIDO — carrusel
+   (global)
+   ============================================================ */
+.wc-slide {
+  min-width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.wc-track {
+  box-sizing: border-box;
+}
+.wc-viewport {
+  box-sizing: border-box;
 }
 
-.hero-score-live .hs-team-score.loser {
-  color: var(--muted);
+/* Hero teams — evitar que nombres largos empujen */
+.hero-teams {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.hero-team {
+  min-width: 0;
+  max-width: 100%;
+}
+.hero-team .name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hero-team .logo {
+  max-width: 100%;
 }
 
-.hero-score-live .hs-vs {
-  font-size: 18px;
-  color: var(--muted);
-  letter-spacing: .18em;
-  text-transform: lowercase;
-}
-
-/* En móvil, ajustamos tamaños */
-@media (max-width: 600px) {
-  .hero-score-live .hs-team-score {
-    font-size: 30px;
-    min-width: 30px;
-  }
-  .hero-score-live .hs-vs {
-    font-size: 15px;
-  }
-  .hero-live-badge,
-  .hero-final-badge {
-    font-size: 10px;
-    padding: 3px 10px;
-    letter-spacing: .16em;
-  }
+/* ============================================================
+   [E] EXTRA — reforzar min-width:0 en contenedores de widgets
+   ============================================================ */
+.widget-slot > .card,
+.widget-slot > .hero {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
