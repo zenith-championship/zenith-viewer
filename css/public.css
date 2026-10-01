@@ -1,0 +1,288 @@
+/* ============================================================
+   ZENITH VIEWER — Public Layout
+   Header horizontal + sidebar móvil
+   ============================================================ */
+
+/* ──── Reset del layout del gestor ──── */
+.public-mode.app-shell {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(111,168,255,.05), transparent 60%), var(--bg-deep);
+}
+
+.public-mode .sidebar { display: none; }
+
+/* ──── TOPBAR ──── */
+.public-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 64px;
+  padding: 0 20px;
+  background: linear-gradient(180deg, #0A0A0C 0%, #050505 100%);
+  border-bottom: 1px solid rgba(111,168,255,0.10);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(111,168,255,0.05);
+}
+
+.public-topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(111,168,255,0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.public-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--silver-light);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* ──── Brand ──── */
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topbar-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.topbar-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.32em;
+  font-weight: 600;
+  color: var(--silver-light);
+}
+
+.topbar-sep {
+  width: 1px;
+  height: 24px;
+  background: linear-gradient(180deg, transparent, rgba(111,168,255,0.25), transparent);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+/* ──── Nav ──── */
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+.topbar-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 14px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.topbar-nav-item:hover { color: var(--silver-light); }
+
+.topbar-nav-item.active { color: var(--silver-light); }
+
+.topbar-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow:
+    0 0 8px var(--accent),
+    0 0 16px rgba(111,168,255,0.55);
+  border-radius: 1px 1px 0 0;
+}
+
+/* ──── Right (selectores) ──── */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Reutilizamos .season-selector y .division-selector del gestor, pero ajustados */
+.public-topbar .season-selector,
+.public-topbar .division-selector {
+  position: relative;
+}
+
+.public-topbar .chip-season-btn,
+.public-topbar .chip-division-btn {
+  height: 34px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+/* ──── SIDEBAR MÓVIL ──── */
+.public-sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #08080A, #050505);
+  border-right: 1px solid var(--border-soft);
+  z-index: 200;
+  transition: left 0.25s ease;
+  flex-direction: column;
+  padding: 20px 14px;
+}
+
+.public-sidebar.open { left: 0; }
+
+.public-sidebar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 16px;
+}
+
+.public-sidebar-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.public-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.public-sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--silver);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  transition: 0.15s;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.public-sidebar-nav a:hover {
+  background: var(--bg-panel);
+  color: var(--silver-light);
+}
+
+.public-sidebar-nav a.active {
+  background: linear-gradient(90deg, rgba(111,168,255,.10), transparent);
+  color: var(--silver-light);
+  border-left-color: var(--accent);
+}
+
+.public-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.public-sidebar-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+/* ──── Contenido principal ──── */
+.public-view {
+  flex: 1;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 26px 28px 60px;
+}
+
+/* ──── RESPONSIVE ──── */
+@media (max-width: 1100px) {
+  .topbar-nav-item {
+    padding: 0 10px;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+  }
+}
+
+@media (max-width: 900px) {
+  .public-menu-toggle { display: block; }
+  .topbar-nav { display: none; }
+  .public-sidebar { display: flex; }
+  .topbar-name { display: none; }
+
+  .public-topbar {
+    padding: 0 12px;
+    gap: 8px;
+    height: 58px;
+  }
+
+  .topbar-logo { width: 32px; height: 32px; }
+
+  .public-view {
+    padding: 16px 14px 60px;
+  }
+
+  .public-topbar .chip-season-btn,
+  .public-topbar .chip-division-btn {
+    height: 30px;
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-right .chip-division-btn span:first-child {
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
