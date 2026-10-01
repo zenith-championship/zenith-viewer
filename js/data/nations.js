@@ -79,6 +79,17 @@ export function getRankColor(rank, level){
   return c[level] || c[1] || '#8D929A';
 }
 
+// ============================================================
+// ABREVIATURAS DE RANGO (móvil)
+// ============================================================
+const RANK_SHORT = {
+  'SSL':            'SSL',
+  'Grand Champion': 'GC',
+  'Champion':       'C',
+  'Diamond':        'D'
+  // Platinum, Gold, Silver, Bronze → sin cambios
+};
+
 export function getRankLabel(rank, level, division){
   if(!rank) return '—';
   if(rank === 'SSL') return 'SSL';
@@ -86,6 +97,27 @@ export function getRankLabel(rank, level, division){
   if(level) parts.push(level);
   if(division) parts.push(division);
   return parts.join(' ');
+}
+
+export function getRankLabelShort(rank, level, division){
+  if(!rank) return '—';
+  if(rank === 'SSL') return 'SSL';
+  const shortRank = RANK_SHORT[rank] || rank;
+  const parts = [shortRank];
+  if(level) parts.push(level);
+  if(division) parts.push(division);
+  return parts.join(' ');
+}
+
+/**
+ * Devuelve la etiqueta de rango según el ancho del viewport.
+ * En móvil (<900px) usa abreviaturas; en desktop usa el nombre completo.
+ */
+export function getRankLabelResponsive(rank, level, division){
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 900;
+  return isMobile
+    ? getRankLabelShort(rank, level, division)
+    : getRankLabel(rank, level, division);
 }
 
 // ============================================================
