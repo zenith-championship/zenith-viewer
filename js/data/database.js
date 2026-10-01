@@ -1,8 +1,25 @@
 // ============================================================
 // ZENITH VIEWER — Database defaults
-// Solo widgets y tipos (el resto viene de Supabase)
+// Solo widgets, tipos y zonas (el resto viene de Supabase)
 // ============================================================
 
+// ============================================================
+// ZONAS POR DEFECTO (fallback para standings.js)
+// ============================================================
+export const DEFAULT_ZONES = {
+  hasTop1Highlight: true,
+  zones: [
+    { from:1,  to:1,  type:'champion',   color:'#E6C476' },
+    { from:2,  to:4,  type:'playoff',    color:'#4ade80' },
+    { from:5,  to:6,  type:'playin',     color:'#6FA8FF' },
+    { from:7,  to:8,  type:'promotion',  color:'#facc15' },
+    { from:9,  to:10, type:'relegation', color:'#f87171' }
+  ]
+};
+
+// ============================================================
+// WIDGETS POR DEFECTO
+// ============================================================
 export function getDefaultWidgets(){
   return [
     { id:'upcoming',        instanceId:'upcoming_default',        name:'Próximo Partido',       enabled:true,  order:1,  span:2, rowSpan:1, config:{ itemIds:[], interval:5 } },
@@ -24,6 +41,9 @@ export function getDefaultWidgets(){
   ];
 }
 
+// ============================================================
+// TIPOS DE WIDGET (metadata)
+// ============================================================
 export const WIDGET_TYPES = [
   { id:'upcoming',        label:'Próximo Partido',       configurable:false },
   { id:'standings',       label:'Tabla General',         configurable:false },
