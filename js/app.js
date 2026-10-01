@@ -15,6 +15,7 @@ import { playersView, bindPlayersEvents } from './views/players.js';
 import { newsView, bindNewsEvents } from './views/news.js';
 import { playoffsView, bindPlayoffsEvents } from './views/playoffs.js';
 import { ballonDorView, bindBallonDorEvents } from './views/ballonDor.js';
+import { marketView, bindMarketEvents } from './views/market.js';
 
 window.addEventListener('error', e => console.error('[ZENITH] error:', e.error || e.message));
 window.addEventListener('unhandledrejection', e => console.error('[ZENITH] promise rejected:', e.reason));
@@ -42,6 +43,7 @@ async function boot() {
     registerRoute('stats',     statsView);
     registerRoute('ballonDor', ballonDorView);
     registerRoute('rosters',   rostersView);
+    registerRoute('market',    marketView);
     registerRoute('news',      newsView);
 
     startRouter((viewFn, params) => {
@@ -91,6 +93,7 @@ function renderView(viewFn, params) {
     safeBind(bindRostersEvents);
     safeBind(bindPlayersEvents);
     safeBind(bindBallonDorEvents);
+    safeBind(bindMarketEvents);
     updateActiveNav();
     window.scrollTo(0, 0);
   } catch (err) {
@@ -276,7 +279,7 @@ function setupHeaderEvents() {
 function setupMobileSidebar() {
   const sidebar = document.getElementById('publicSidebar');
   const overlay = document.getElementById('sidebarOverlay');
-  const open = () => { sidebar?.classList.add('open'); overlay?.classList.add('open'); };
+  const open  = () => { sidebar?.classList.add('open'); overlay?.classList.add('open'); };
   const close = () => { sidebar?.classList.remove('open'); overlay?.classList.remove('open'); };
 
   document.getElementById('menuToggle')?.addEventListener('click', open);
@@ -285,7 +288,7 @@ function setupMobileSidebar() {
 }
 
 // ---------- UTILS ----------
-function esc(str){
+function esc(str) {
   return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
 }
 
